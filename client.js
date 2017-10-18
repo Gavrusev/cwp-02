@@ -1,32 +1,50 @@
 const net = require('net');
+const fs = require('fs');
 const port = 8124;
 const startConnect = 'QA';
 const serverOK="ASK";
 let questions=[];
+const serverNO = 'DEC';
 let  currentQuestionIndex = 0;
+const qaPath = "./qa.json";
 const qaPath = "./qa.json";
 
 const client = new net.Socket();
 const fs = require('fs');
+let ind = 0;
 client.setEncoding('utf8');
-
+ client.on('data',AskQuestions);
 
 client.connect(port, function() {
-  console.log('Connected');
-  client.write(startConnect);
+
+
+  fs.readFile(qaPath, function (err, data) {
+           if (err) {
+               console.log(err);
+           }
+           else {
+               questions = JSON.parse(data);
+               mixQuestion();
+              console.log('Connected');
+     client.write(startConnect);
+           }
+       });
 });
 
 
 
 client.on('data', function(data) {
-    console.log(data);
 
-if (data === serverOK)
-{
-   fs.readFile(qaPath, function (err, data) {
-        if (err)
+     if (data === servrOK)
+         {
+             client.write(questions[ind].quesion);
+    
+
+
+     if (data === serverOK)
         {
-            console.log(err);
+             client.write(questions[ind].question);
+
         }
         else
       {
