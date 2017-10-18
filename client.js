@@ -1,78 +1,73 @@
 const net = require('net');
-const fs = require('fs');
 const port = 8124;
 const startConnect = 'QA';
-const serverOK="ASK";
-let questions=[];
+const serverOK = 'ACK';
+let questions = [];
 const serverNO = 'DEC';
-let  currentQuestionIndex = 0;
+let currentQuestionIndex = 0;
 const qaPath = "./qa.json";
-const qaPath = "./qa.json";
-
 const client = new net.Socket();
 const fs = require('fs');
 let ind = 0;
 client.setEncoding('utf8');
- client.on('data',AskQuestions);
+
 
 client.connect(port, function() {
 
-
-  fs.readFile(qaPath, function (err, data) {
-           if (err) {
-               console.log(err);
-           }
-           else {
-               questions = JSON.parse(data);
-               mixQuestion();
-              console.log('Connected');
-     client.write(startConnect);
-           }
-       });
+    fs.readFile(qaPath, function (err, data) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            questions = JSON.parse(data);
+            mixQuestion();
+           console.log('Connected');
+  client.write(startConnect);
+        }
+    });
 });
 
 
 
 client.on('data', function(data) {
+    if (data === serverOK)
+    {
+        client.write(questions[ind].question);
 
-     if (data === servrOK)
-         {
-             client.write(questions[ind].quesion);
-    
+    }
+    else if (data === serverNO)
+    {
+        console.log(data);
+        client.destroy();
 
-
-     if (data === serverOK)
-        {
-             client.write(questions[ind].question);
-
+    }
+    else if (data !== serverOK) {
+        console.log("\nQuestion: " + questions[ind].question);
+        console.log("Server answer: " + data);
+        console.log(data === questions[ind].true.toString() ?
+            "Server answer is true" :
+            "True answer: " + questions[ind].true);
+        if (++ind !== questions.length) {
+            client.write(questions[ind].question)
         }
-        else
-      {
-           questions = JSON.parse(data);
-            mixQuestion();
-            client.write(serverOK);
-
-         for (let i = 0 ; i < questions.length; i ++)
-              {
-                console.log(questions[i].question);
-                console.log(questions[i].true);
-                console.log(questions[i].false);
-              }
-
+        else {
+            client.destroy();
         }
-    });
-}
+    }
 
-else
-{
-  client.destroy();
-}
-  });
+});
+
+client.on('close', function() {
+  console.log('Connection closed');
+});
+
+
 function mixQuestion() {
     let counter = questions.length;
 
     while (counter > 0) {
         let index = Math.floor(Math.random() * counter);
+
         counter--;
 
         let temp = questions[counter];
