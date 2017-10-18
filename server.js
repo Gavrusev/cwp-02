@@ -5,7 +5,11 @@ let seed = 0;
 const serverOK = 'ACK';
 const serverNO = 'DEC';
 const startConnect = 'QA';
-
+const qaPath = "./qa.json";
+const clientLogPathDefault = './logs'
+let questions = [];
+let seed = 0;
+let fdFile;
    const server = net.createServer((client) => {
 
 
@@ -29,7 +33,7 @@ const startConnect = 'QA';
          {
             client.write(serverNO);
             client.write(err);
-
+             client.on('end', () => console.log('Client disconnected'));
            }
     }
 
